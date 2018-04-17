@@ -6,18 +6,20 @@
  */
 package cn.codelion.plugins.activemq.publish;
 
-import javax.annotation.Resource;
-import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.Session;
 
-import org.apache.activemq.command.ActiveMQTopic;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.jms.core.MessageCreator;
 import org.springframework.stereotype.Service;
+
+import com.alibaba.fastjson.JSONObject;
+
+import cn.codelion.plugins.activemq.bean.ActivemqMsgBean;
 
 /**
  * @author QiaoYu[www.codelion.cn]
@@ -26,17 +28,18 @@ import org.springframework.stereotype.Service;
 public class MQPublisherServer {
 	private static final Logger logger = LoggerFactory.getLogger(MQPublisherServer.class);
 
-	@Resource
+	@Autowired
 	private JmsTemplate jmsTemplate;
 
-	public void publish(String destinationName, String message) {
-		logger.debug("给地址主题为" + destinationName + "发送消息:" + message);
-		Destination destination = new ActiveMQTopic(destinationName);
+	public void sendMessage(String destination, ActivemqMsgBean activemqMsgBean) {
+		logger.debug("给"+destination+"发送消息"+JSONObject.toJSONString(activemqMsgBean));
 		jmsTemplate.send(destination, new MessageCreator() {
-			@Override
 			public Message createMessage(Session session) throws JMSException {
+				String message = JSONObject.toJSONString(activemqMsgBean);
 				return session.createTextMessage(message);
 			}
 		});
+
 	}
+
 }

@@ -32,12 +32,8 @@ pagehelper:
   supportMethodsArguments: true
   params: count=countSql
 spring:
-  jms:
-    pub-sub-domain: true
-    listener:
-      auto-startup: true
   activemq:
-      broker-url: tcp://127.0.0.1:61616
+      broker-url: tcp://192.168.0.137:61616
       in-memory: true
       password: admin
       user: admin
@@ -55,8 +51,8 @@ spring:
   redis:
     timeout: 3000
     port: 6379
-    password: redispassword.
-    host: 39.106.41.177
+    password: 123456
+    host: 192.168.0.137
     database: 5
     pool:
       max-wait: 1000
@@ -72,6 +68,8 @@ spring:
       force: true
       enabled: true
       charset: UTF-8
+  jms:
+    pub-sub-domain: true
       
 systemconfig:
   cors:
@@ -82,5 +80,36 @@ systemconfig:
       exposedHeaders: ""
       allowCredentials: "false"
       maxAge: 86400
+  aliOSS:
+    endpoint: http://oss-cn-beijing.aliyuncs.com
+    accessKeyId: LTAIJuAAYm5fDqwm
+    accessKeySecret: 4TbWkvkDyx7F4ivsSNtuVHGmnvoj8G
+    bucketName: xl-oss-pro
+    thirdapp-same: 0
+    thirdapp-endpoint: http://oss-cn-beijing.aliyuncs.com
+    thirdapp-accessKeyId: LTAINbwOMw6UaaK3
+    thirdapp-accessKeySecret: CxOkyQD24n8d0kOzg3MYcQlopBUeDY
+    thirdapp-bucketName: xl-oss-pro1
+    pool:
+      #允许打开的最大HTTP连接数。默认为1024
+      maxConnections: 1024
+      #Socket层传输数据的超时时间（单位：毫秒）。默认为50000毫秒
+      socketTimeout: 50000
+      #建立连接的超时时间（单位：毫秒）。默认为50000毫秒
+      connectionTimeout: 50000
+      #从连接池中获取连接的超时时间（单位：毫秒）。默认不超时
+      connectionRequestTimeout: 120000
+      #如果空闲时间超过此参数的设定值，则关闭连接（单位：毫秒）。默认为60000毫秒
+      idleConnectionTime: 60000
+      #请求失败后最大的重试次数。默认3次
+      maxErrorRetry: 3
+      #是否支持CNAME作为Endpoint，默认支持CNAME
+      supportCname: true
+      #是否开启二级域名（Second Level Domain）的访问方式，默认不开启
+      SLDEnabled: false
+      #连接OSS所采用的协议（HTTP/HTTPS），默认为HTTP
+      protocol: HTTP
+      #用户代理，指HTTP的User-Agent头。默认为”aliyun-sdk-java”
+      userAgent: aliyun-sdk-java
 logging:
   config: classpath:config/log4j2.xml

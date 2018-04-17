@@ -38,4 +38,23 @@ public class StringUtils {
 	public static String getUUID() {
 		return UUID.randomUUID().toString().replace("-", "");
 	}
+	public static boolean isNotNullUnDefined(String str) {
+		if (null != str && str.length() > 0 && !"null".equals(str) && !"undefined".equals(str)) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
+	public static boolean compareStr(String source,String target) {
+		if (isEmpty(source) || isEmpty(target)) {
+			return true;
+		}else {
+			if (source.equals(target)) {
+				return false;
+			}else {
+				return true;
+			}
+		}
+	}
 }

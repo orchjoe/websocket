@@ -1,6 +1,5 @@
 package cn.codelion.plugins.websocket.handler;
 
-import java.util.Date;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -13,6 +12,11 @@ import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketMessage;
 import org.springframework.web.socket.WebSocketSession;
 
+import com.alibaba.fastjson.JSONObject;
+
+import cn.codelion.plugins.activemq.bean.ActivemqMsgBean;
+import cn.codelion.plugins.activemq.service.StudentDialogTopicService;
+import cn.codelion.plugins.websocket.bean.WebSocketMsgBean;
 import cn.codelion.plugins.websocket.cache.StudentWebSocketMap;
 
 @Component
@@ -20,6 +24,8 @@ public class StudentWebSocketHandler implements WebSocketHandler {
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 	@Autowired
 	StudentWebSocketMap studentWebSocketMap;
+	@Autowired
+	StudentDialogTopicService studentDialogTopicService;
 
 	@Override
 	public void afterConnectionClosed(WebSocketSession session, CloseStatus closeStatus) throws Exception {
@@ -45,7 +51,21 @@ public class StudentWebSocketHandler implements WebSocketHandler {
 
 	@Override
 	public void handleMessage(WebSocketSession session, WebSocketMessage<?> message) throws Exception {
-		session.sendMessage(new TextMessage(new Date() + ""));
+		if (message instanceof TextMessage) {
+			handleTextMessage(session, (TextMessage) message);
+		} else {
+			throw new IllegalStateException("Unexpected WebSocket message type: " + message);
+		}
+	}
+
+	public void handleTextMessage(WebSocketSession session, TextMessage message) {
+		String msg = new String(message.asBytes());
+		WebSocketMsgBean webSocketMsgBean = JSONObject.parseObject(msg,WebSocketMsgBean.class);
+		ActivemqMsgBean activemqMsgBean = new ActivemqMsgBean();
+		activemqMsgBean.setMsg(webSocketMsgBean.getMsg());
+		activemqMsgBean.setType("101");
+		activemqMsgBean.setUsers(webSocketMsgBean.getUserId());
+		studentDialogTopicService.sendMsg(activemqMsgBean);
 	}
 
 	@Override
@@ -67,7 +87,7 @@ public class StudentWebSocketHandler implements WebSocketHandler {
 		return false;
 	}
 
-	public void sendMessageToUsers(String userId, String message) {
+	public synchronized void sendMessageToUsers(String userId, String message) {
 		String[] userIds = userId.split(",");
 		for (int i = 0; i < userIds.length; i++) {
 			Map<String, WebSocketSession> swsm = studentWebSocketMap.getStudentWebSocketMap();

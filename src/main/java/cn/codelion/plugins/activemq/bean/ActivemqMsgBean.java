@@ -46,4 +46,20 @@ public class ActivemqMsgBean {
 	public void setMsg(String msg) {
 		this.msg = msg;
 	}
+	/** <默认构造函数> 
+	 */
+	public ActivemqMsgBean(String id, String type, String users, String url, String msg) {
+		super();
+		this.id = id;
+		this.type = type;
+		this.users = users;
+		this.url = url;
+		this.msg = msg;
+	}
+	/** <默认构造函数> 
+	 */
+	public ActivemqMsgBean() {
+		super(); 
+	}
+	
 }

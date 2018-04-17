@@ -17,8 +17,8 @@ import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSONObject;
 
-import cn.codelion.core.util.StringUtils;
 import cn.codelion.plugins.activemq.bean.ActivemqMsgBean;
+import cn.codelion.plugins.activemq.contents.JMSContent;
 import cn.codelion.plugins.websocket.handler.StudentWebSocketHandler;
 
 /**
@@ -30,22 +30,24 @@ public class CustomerServiceListener {
 	@Autowired
 	StudentWebSocketHandler studentWebSocketHandler;
 
-	@JmsListener(destination = "student.aienglish.topic", containerFactory = "myJmsContainerFactory")
-	public void subscribe(TextMessage message) {
-		try {
-			String text = message.getText();
-			ActivemqMsgBean activemqMsgBean = JSONObject.parseObject(text, ActivemqMsgBean.class);
-			logger.debug("客户端接收到topic为[student.aienglish.topic]内容为:" + text);
-			if (StringUtils.isEmpty(activemqMsgBean.getType()) || activemqMsgBean.getType().equals("1")) {
-				logger.debug("作业考试推送");
-				studentWebSocketHandler.sendMessageToUsers(activemqMsgBean.getUsers(), activemqMsgBean.getMsg());
-			} else {
-				logger.debug("模拟考试推送");
-			}
-			message.acknowledge();
-		} catch (JMSException e) {
-			e.printStackTrace();
-		}
-
+	@JmsListener(destination = JMSContent.QUEUE_MESSAGE_TALK, containerFactory = "queueListenerFactory")
+	public void receiveTalkQueue(TextMessage message) throws Exception {
+		logger.debug(Thread.currentThread().getName() + ":[" + JMSContent.QUEUE_MESSAGE_TALK + "]收到的报文为:" + message.getText());
 	}
+
+	@JmsListener(destination = JMSContent.TOPIC_MESSAGE_TALK, containerFactory = "topicListenerFactory")
+	public void receiveTalkTopic(TextMessage message) throws JMSException {
+		logger.debug(Thread.currentThread().getName() + ":[" + JMSContent.TOPIC_MESSAGE_TALK + "]收到的报文为:" + message.getText());
+		String text = message.getText();
+		ActivemqMsgBean activemqMsgBean = JSONObject.parseObject(text, ActivemqMsgBean.class);
+		studentWebSocketHandler.sendMessageToUsers(activemqMsgBean.getUsers(), activemqMsgBean.getMsg());
+		message.acknowledge();
+		
+	}
+
+	@JmsListener(destination = JMSContent.QUEUE_MESSAGE_EMAIL, containerFactory = "queueListenerFactory")
+	public void receiveEmailTopic(TextMessage message) throws JMSException {
+		logger.debug(Thread.currentThread().getName() + ":[" + JMSContent.QUEUE_MESSAGE_EMAIL + "]收到的报文为:" + message.getText());
+	}
+
 }
